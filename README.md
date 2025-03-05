@@ -4,9 +4,9 @@ Este projeto é uma Calculadora de Ganho de Capital para operações de compra e
 
 ## Requisitos
 
-* Java 17 ou superior
+* Java 17
 * Gradle 8.5 ou superior
-* Docker (opcional, caso deseje executar via Docker)
+* Docker (opcional)
 
 ## Arquivos Principais
 
@@ -14,6 +14,7 @@ Este projeto é uma Calculadora de Ganho de Capital para operações de compra e
 - [`GanhoCapitalServiceImpl.kt`](src/main/kotlin/br/com/codingtest/service/GanhoCapitalServiceImpl.kt): Responsável por processar uma lista de operações de compra e venda de ações
 - [`CompraHandler.kt`](src/test/kotlin/br/com/codingtest/handler/CompraHandler.kt): Classe que atualiza a média ponderada do preço das ações e a quantidade total no contexto
 - [`VendaHandler.kt`](src/test/kotlin/br/com/codingtest/handler/VendaHandler.kt): Classe que verifica se há ações suficientes para vender, calcula o ganho ou prejuízo da operação e ajusta o prejuízo acumulado no contexto. Se houver lucro, deduz eventuais prejuízos acumulados antes de calcular o imposto devido.
+- [`OperacaoContext.kt`](src/test/kotlin/br/com/codingtest/context/OperacaoContext.kt): Objeto ImpostoCalculator responsável pelo cálculo do imposto sobre ganho de capital. Ela possui duas funções principais: Calcula o imposto aplicando a taxa sobre o ganho líquido e Reduz o prejuízo acumulado do ganho bruto antes de calcular o imposto
 
 ## Como Executar
 
