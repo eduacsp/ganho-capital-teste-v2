@@ -1,5 +1,6 @@
 package br.com.codingtest
 
+import br.com.codingtest.config.AppConfig
 import br.com.codingtest.domain.Operacao
 import br.com.codingtest.enums.TipoOperacao
 import br.com.codingtest.service.GanhoCapitalService
@@ -11,7 +12,15 @@ import java.math.BigDecimal
 
 class GanhoCapitalServiceImplTest {
 
-    private val service: GanhoCapitalService = GanhoCapitalServiceImpl()
+    private val config = AppConfig(
+        taxaImposto = BigDecimal("0.20"),
+        valorIsencao = BigDecimal("20000.00"),
+        escalaPadrao = 2,
+        ganhoZerado = 0,
+        retornoZero = BigDecimal("0.00")
+    )
+
+    private val service: GanhoCapitalService = GanhoCapitalServiceImpl(config)
 
     @Test
     fun `deve calcular imposto zero para operacoes de compra`() {

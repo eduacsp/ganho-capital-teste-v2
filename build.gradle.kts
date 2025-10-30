@@ -17,7 +17,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.0")
-    testImplementation("org.assertj:assertj-core:3.22.0")
+    testImplementation("org.assertj:assertj-core:3.24.2")
     implementation(kotlin("stdlib-jdk8"))
 }
 

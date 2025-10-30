@@ -1,6 +1,6 @@
 package br.com.codingtest.util
 
-import br.com.codingtest.config.Configuracao.ESCALA_PADRAO
+import br.com.codingtest.config.AppConfig
 import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
@@ -9,12 +9,11 @@ import java.lang.reflect.Type
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-class BigDecimalSerializer : JsonSerializer<BigDecimal> {
+class BigDecimalSerializer(private val config: AppConfig) : JsonSerializer<BigDecimal> {
     override fun serialize(
         src: BigDecimal,
         typeOfSrc: Type?,
         context: JsonSerializationContext?
-    ): JsonElement {
-        return JsonPrimitive(src.setScale(ESCALA_PADRAO, RoundingMode.HALF_UP).toPlainString())
-    }
+    ): JsonElement =
+        JsonPrimitive(src.setScale(config.escalaPadrao, RoundingMode.HALF_UP).toPlainString())
 }
