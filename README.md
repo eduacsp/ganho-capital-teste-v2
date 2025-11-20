@@ -1,20 +1,92 @@
-# Ganho Capital Teste
+# Calculadora de Ganho de Capital
 
-Este projeto é uma Calculadora de Ganho de Capital para operações de compra e venda de ações. Ele processa uma série de operações e calcula os impostos devidos com base nas regulamentações fiscais brasileiras. A aplicação lê um JSON contendo as operações e retorna um JSON com os impostos calculados para cada operação.
+**Projeto para avaliação técnica – Processamento de operações de renda variável**
+
+Este projeto implementa uma **Calculadora de Ganho de Capital** capaz de processar operações de compra e venda de ações e determinar o imposto devido.  
+A aplicação recebe um ou mais blocos de operações em formato JSON via entrada padrão, processa cada bloco de forma independente e retorna o cálculo de imposto para cada operação.
+
+O objetivo é demonstrar clareza de código, organização, domínio de lógica fiscal e qualidade arquitetural utilizando **Kotlin**, **Gradle** e boas práticas de engenharia de software.
 
 ## Requisitos
 
-* Java 17
-* Gradle 8.5 ou superior
-* Docker (opcional)
+- **Kotlin** (JVM)
+- **Java 17**
+- **Gradle 8.5+**
+- **Docker** (opcional)
+- **Gson** – serialização customizada para `BigDecimal`
 
-## Arquivos Principais
+# 📦 Arquitetura do Projeto
 
-- [`GanhoCapitalMain.kt`](src/main/kotlin/br/com/codingtest/GanhoCapitalMain.kt): Ponto de entrada da aplicação para leitura da entrada padrão, processamento de blocos independentes, desserialização do JSON, invoca o serviço GanhoCapitalServiceImpl para processar as operações e serialização da Saída
-- [`GanhoCapitalServiceImpl.kt`](src/main/kotlin/br/com/codingtest/service/GanhoCapitalServiceImpl.kt): Responsável por processar uma lista de operações de compra e venda de ações
-- [`CompraHandler.kt`](src/test/kotlin/br/com/codingtest/handler/CompraHandler.kt): Classe que atualiza a média ponderada do preço das ações e a quantidade total no contexto
-- [`VendaHandler.kt`](src/test/kotlin/br/com/codingtest/handler/VendaHandler.kt): Classe que verifica se há ações suficientes para vender, calcula o ganho ou prejuízo da operação e ajusta o prejuízo acumulado no contexto. Se houver lucro, deduz eventuais prejuízos acumulados antes de calcular o imposto devido.
-- [`OperacaoContext.kt`](src/test/kotlin/br/com/codingtest/context/OperacaoContext.kt): Objeto ImpostoCalculator responsável pelo cálculo do imposto sobre ganho de capital. Ela possui duas funções principais: Calcula o imposto aplicando a taxa sobre o ganho líquido e Reduz o prejuízo acumulado do ganho bruto antes de calcular o imposto
+A solução segue uma estrutura baseada em **Domain + Services + Chain of Responsibility**, com lógica fiscal isolada e totalmente testável:
+
+```bash
+src/
+└─ main/kotlin/
+├─ config/ → Carregamento de configurações
+├─ context/ → Regras fiscais e cálculo de imposto
+├─ domain/ → Modelos de domínio (Operacao, Resultado, Contexto)
+├─ enums/ → Enum de tipos de operação
+├─ handler/ → Handlers BUY e SELL (Chain of Responsibility)
+├─ service/ → Serviço principal (GanhoCapitalService)
+├─ util/ → Serialização/deserialização BigDecimal
+└─ GanhoCapitalMain.kt → Entrada da aplicação
+```
+
+# 🔍 Principais Classes
+
+### **`GanhoCapitalMain.kt`**
+- Lê entrada via `stdin`
+- Suporta múltiplos blocos JSON
+- Desserializa operações
+- Usa `GanhoCapitalServiceImpl` para processar
+- Serializa a saída
+- Exibe mensagens claras de erro
+
+---
+
+### **`GanhoCapitalServiceImpl.kt`**
+- Encadeia os handlers (`CompraHandler` → `VendaHandler`)
+- Mantém estado no `OperacaoContext`
+- Retorna lista de `Resultado` para cada operação
+
+---
+
+### **`CompraHandler.kt`**
+Responsável por:
+- Atualizar quantidade total de ações
+- Recalcular média ponderada
+- Retornar imposto zero
+
+---
+
+### **`VendaHandler.kt`**
+Responsável por:
+- Validar disponibilidade de ações
+- Calcular ganho bruto
+- Compensar prejuízo acumulado
+- Atualizar prejuízo acumulado
+- Calcular imposto via `ImpostoCalculator`
+
+---
+
+### **`ImpostoCalculator.kt`**
+Regras fiscais implementadas:
+1. Compensação automática de prejuízo acumulado
+2. Aplicação da taxa de 20% **somente** quando:
+    - há ganho líquido positivo
+    - o valor da venda supera R$ 20.000
+3. Arredondamento com `HALF_UP`
+
+---
+
+### **`AppConfig`**
+Carrega parâmetros de `application.properties`, permitindo ajustes sem alterar o código:
+- taxa.imposto
+- valor.isencao
+- escala.padrao
+- ganho.zerado
+- retorno.zero
+
 
 ## Como Executar
 
@@ -97,10 +169,21 @@ Os resultados dos testes estarão disponíveis no diretório `build/reports/test
 
 ## Decisões de Design
 
-1. **Entrada via JSON**: O formato JSON foi escolhido para facilitar a integração com outras aplicações e permitir testes automatizados de maneira mais simples.
-2. **Cálculo Baseado em Preço Médio Ponderado**: O sistema utiliza essa abordagem para determinar o custo das ações, seguindo as regras de tributação da Receita Federal.
-3. **Uso do Pattern Chain of Responsibility**: O cálculo do ganho de capital foi estruturado utilizando o padrão de projeto **Chain of Responsibility**. Esse padrão foi escolhido para tornar o processamento de regras fiscais mais flexível e extensível. Com ele, é possível adicionar novas regras de tributação ou alterar a ordem de aplicação das regras sem modificar a lógica central da aplicação, garantindo melhor manutenibilidade e escalabilidade do código.
-4. **Execução via Pipeline**: A aplicação permite o redirecionamento de entrada/saída para uso em pipelines de automação.
+1. **Chain of Responsibility**
+
+Permite adicionar novas regras sem alterar lógica existente (OCP).
+
+2. **Uso seguro de BigDecimal**
+
+Serialização customizada evita inconsistências entre JSON e cálculo fiscal.
+
+3. **Contexto de Operações**
+
+Isola o estado da carteira, mantendo domínio claro e testável.
+
+4. **Configuração via application.properties**
+
+Permite simulações com diferentes taxas ou valores de isenção.
 
 ## Exemplo de Entrada e Saída
 
@@ -125,3 +208,4 @@ Os resultados dos testes estarão disponíveis no diretório `build/reports/test
 ## Licença
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
