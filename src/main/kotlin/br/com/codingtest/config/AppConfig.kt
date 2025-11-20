@@ -26,6 +26,7 @@ fun loadConfig(): AppConfig {
 
     require(config.taxaImposto >= BigDecimal.ZERO) { "Taxa de imposto não pode ser negativa" }
     require(config.valorIsencao >= BigDecimal.ZERO) { "Valor de isenção não pode ser negativo" }
-    require(config.escalaPadrao >= 0) { "Escala padrão não pode ser negativa" }
+    require(config.escalaPadrao == 2) { "Escala padrão deve ser 2 casas decimais" }
+
     return config
 }

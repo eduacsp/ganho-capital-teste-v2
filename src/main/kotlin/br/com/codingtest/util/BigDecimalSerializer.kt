@@ -14,6 +14,8 @@ class BigDecimalSerializer(private val config: AppConfig) : JsonSerializer<BigDe
         src: BigDecimal,
         typeOfSrc: Type?,
         context: JsonSerializationContext?
-    ): JsonElement =
-        JsonPrimitive(src.setScale(config.escalaPadrao, RoundingMode.HALF_UP).toPlainString())
+    ): JsonElement {
+        val valorAjustado = src.setScale(config.escalaPadrao, RoundingMode.HALF_UP)
+        return JsonPrimitive(valorAjustado)
+    }
 }

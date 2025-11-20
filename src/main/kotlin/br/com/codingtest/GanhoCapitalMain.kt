@@ -56,17 +56,11 @@ internal fun processarBlocoDeOperacoes(
     service: GanhoCapitalService,
     gson: Gson
 ) {
-    try {
-        val reader = JsonReader(StringReader(blocoJson.trim())).apply { isLenient = true }
-        val tipo = object : TypeToken<List<Operacao>>() {}.type
-        val operacoes: List<Operacao> = gson.fromJson(reader, tipo)
-        val resultado = service.calcularGanhoDeCapital(operacoes)
-        println(toJson(resultado, gson))
-    } catch (e: JsonSyntaxException) {
-        println("Erro ao processar o bloco: JSON inválido. ${e.message}")
-    } catch (e: Exception) {
-        println("Erro ao processar o bloco: ${e.message}")
-    }
+    val reader = JsonReader(StringReader(blocoJson.trim())).apply { isLenient = true }
+    val tipo = object : TypeToken<List<Operacao>>() {}.type
+    val operacoes: List<Operacao> = gson.fromJson(reader, tipo)
+    val resultado = service.calcularGanhoDeCapital(operacoes)
+    println(toJson(resultado, gson))
 }
 
 private fun toJson(resultados: List<Resultado>, gson: Gson): String {
